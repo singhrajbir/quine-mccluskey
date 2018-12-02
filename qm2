@@ -1,0 +1,442 @@
+package qm2;
+import java.util.*;
+public class Qm2 {
+    public static void main(String[] args) {
+        int i,j,k,m,n,buf,l;
+        String input,input2;
+        ArrayList <String> bin;
+        Scanner in= new Scanner(System.in);
+        System.out.println("Enter the min sum terms:");               //take input of min terms
+        input=in.nextLine();
+        ArrayList<Integer> min=new ArrayList();
+        ArrayList<Integer> d=new ArrayList();
+        String[] parts= input.split("[, ]");
+        bin=new ArrayList<String>();
+        for(i=0;i<parts.length;i++)
+            {                                                         
+                if(parts[i].length()!=0)
+                {
+                    min.add(Integer.parseInt(parts[i]));
+                }
+            }
+        System.out.println("You want to enter donot care or not(y/n):");
+        String option=in.nextLine();
+        if(option.equals("y"))
+        {
+            System.out.println("Enter the donot care terms:");          //take input of donot care terms
+            input2=in.nextLine();
+            String[] parts2= input2.split("[, ]");
+            for(i=0;i<parts2.length;i++)
+                {
+                    if(parts2[i].length()!=0)
+                    {
+                        d.add(Integer.parseInt(parts2[i]));
+                    }
+                }
+        }
+        int max=min.get(0);
+        for(i=0;i<min.size();i++)
+        {
+            if(min.get(i)>max)
+            {
+                max=min.get(i);                                                         
+            }
+        }
+        for(i=0;i<d.size();i++)                                                     // finding maximum of numbers
+        {
+            if(d.get(i)>max)
+            {
+                max=d.get(i);
+            }
+        }
+        int digit=Integer.toBinaryString(max).length();
+        System.out.println(digit);
+        b array[][]=new b[digit+1][digit+1];                                         //creating 2 d array of blocks
+        for(i=0;i<digit+1;i++)
+        {
+            for(j=0;j<digit+1;j++)
+            {
+                array[i][j]=new b();
+            }
+        }   
+        for(i=0;i<min.size();i++)
+        {
+            bin.add(Integer.toBinaryString(min.get(i)));
+            if(bin.get(i).length()<digit)
+            {
+                String s=""+bin.get(i);
+                for(j=bin.get(i).length();j<digit;j++)                                    // getting binary of required length
+                {
+                    s="0"+s;
+                }
+                bin.set(i, s);
+            }
+            int c=count(bin.get(i));
+            array[c][0].binary.add(bin.get(i));                                           // setting first of table
+            array[c][0].integer.add(""+min.get(i));
+            array[c][0].compar.add(false);
+            System.out.println(bin.get(i));
+        }
+        int size=bin.size();
+        for(i=0;i<d.size();i++)
+        {
+            bin.add(Integer.toBinaryString(d.get(i)));
+            if(bin.get(i+size).length()<digit)
+            {
+                String s=""+bin.get(i+size);
+                for(j=bin.get(i+size).length();j<digit;j++)
+                {
+                    s="0"+s;                                                                
+                }
+                bin.set(i+size, s);
+            }
+            int c=count(bin.get(i+size));
+            array[c][0].binary.add(bin.get(i+size));
+            array[c][0].integer.add(""+d.get(i));
+            array[c][0].compar.add(false);
+            System.out.println(bin.get(i+size));
+        }
+        for(j=1;j<digit+1;j++)
+        {
+            for(i=0;i<digit;i++)
+            {
+                b x=array[i][j-1];
+                b y=array[i+1][j-1];
+                b z=array[i][j];
+                for(m=0;m<x.binary.size();m++)
+                {
+                    for(n=0;n<y.binary.size();n++)                                               //setting other columns of table
+                    {
+                        int common=0;
+                        int index=0;
+                        for(k=0;k<digit;k++)
+                        {
+                            if(x.binary.get(m).charAt(k)!=y.binary.get(n).charAt(k))
+                            {
+                                common++;
+                                index=k;
+                            }
+                        }
+                        if(common==1)
+                        {
+                            String s=x.binary.get(m).substring(0,index) + "_" + x.binary.get(m).substring(index+1);
+                            z.binary.add(s);
+                            z.integer.add(x.integer.get(m)+","+y.integer.get(n));
+                            z.compar.add(false);
+                            x.compar.set(m,true);
+                            y.compar.set(n,true);
+                        }
+                    }
+                }
+            }
+        }
+        for(j=0;j<digit+1;j++)
+        {
+            for(i=0;i<digit+1;i++)
+            {
+                if(array[i][j]!=null)
+                {
+                    for(k=0;k<array[i][j].binary.size();k++)
+                    {
+                        System.out.print(" Binary number: "+array[i][j].binary.get(k)+"\t");
+                        System.out.print(" Integers : "+array[i][j].integer.get(k));
+                        System.out.println(" Checked or not: "+array[i][j].compar.get(k));
+                    }
+                }
+            }
+        }
+        ArrayList<String> fin=new ArrayList<>();
+        ArrayList<String> num=new ArrayList<>();
+        for(j=digit;j>=0;j--)
+        {
+            for(i=0;i<digit+1;i++)
+            {
+                if(array[i][j]!=null)
+                {
+                    for(k=0;k<array[i][j].binary.size();k++)                           // finding  prime implicants
+                    {
+                        int check=0;
+                        for(m=0;m<fin.size();m++)
+                        {
+                            if(array[i][j].binary.get(k).equals(fin.get(m)))
+                            {
+                                check=1;
+                            }
+                        }
+                        if((array[i][j].compar.get(k)==false)&&check==0)
+                        {
+                            fin.add(array[i][j].binary.get(k));
+                            num.add(array[i][j].integer.get(k));
+                        }
+                    }
+                }
+            }
+        }
+         int b[]=new int[fin.size()];
+         for(m=0;m<fin.size();m++)
+         {
+             b[m]=0;
+         }
+        int a[][]=new int[fin.size()][max+1];
+        for(m=0;m<fin.size();m++)
+        {
+            for(n=0;n<max+1;n++)
+            {
+                a[m][n]=1;
+            }
+        }
+        for(m=0;m<num.size();m++)
+        {
+            String[] parts3= num.get(m).split("[ ,]");
+            for(i=0;i<parts3.length;i++)
+                {
+                    if(parts3[i].length()!=0)
+                    {                                                                 //handling donot cares in table
+                        int check2=0;
+                        for(l=0;l<d.size();l++)
+                        {
+                            if(d.get(l)==Integer.parseInt(parts3[i]))
+                                check2=1;
+                        }
+                        if(check2==0)
+                        a[m][Integer.parseInt(parts3[i])]=0;
+                    }
+                }
+        }
+        for(m=0;m<fin.size();m++)
+        {
+            for(n=0;n<max+1;n++)
+            {
+                System.out.print(a[m][n]+"\t");
+            }
+            System.out.println();
+        }
+        System.out.println();
+        int p,q;
+       ArrayList<String> Answer=new ArrayList<>();                               //answer terms arraylist
+        for(m=0;m<max+1;m++)
+        {
+            int numzero=0,place=0;
+            for(n=0;n<fin.size();n++)
+            {
+                if(a[n][m]==0)
+                {
+                    place=n;
+                    numzero++;
+                }
+            }
+            if(numzero==1)
+            {
+                b[place]=1;
+                Answer.add(ans(fin.get(place)));
+                for(p=0;p<max+1;p++)
+                {
+                    if(a[place][p]==0)                                               //finding essential prime implicants
+                    {
+                        for(q=0;q<fin.size();q++)
+                        {
+                            a[q][p]=1;
+                        }
+                    }
+                    a[place][p]=1;
+                }
+            }
+        }
+         for(m=0;m<fin.size();m++)
+        {
+            for(n=0;n<max+1;n++)
+            {
+                System.out.print(a[m][n]+"\t");
+            }
+            System.out.println();
+        }
+         System.out.println("yo");
+        
+         for(m=0;m<fin.size();m++)
+        {
+            for(n=m+1;n<fin.size();n++)
+            {
+                int count1=0,count2=0,count3=0;
+                for(p=0;p<max+1;p++)
+                {
+                    if(a[n][p]==0)
+                    {                                                                     // filling table after finding essential prime implicants
+                        count2++;
+                    }
+                    if(a[m][p]==0)
+                    {
+                        count1++;
+                    }
+                    if(a[m][p]==0&&a[n][p]==0)
+                    {
+                        count3++;
+                    }
+                }
+                if(count3==count1&&count3>0&&count1!=count2)
+                {
+                    for(q=0;q<max+1;q++)
+                    {
+                        a[m][q]=1;
+                    }
+                    b[m]=1;
+                    b[n]=2;
+                }
+                if(count3==count2&&count3>0&&count2!=count1)
+                {
+                    for(q=0;q<max+1;q++)
+                    {
+                        a[n][q]=1;
+                    }
+                    b[n]=1;
+                    b[m]=2;
+                }
+            }
+        }
+              for(m=0;m<fin.size();m++)
+        {
+            System.out.println(b[m]);
+        }
+        for(m=0;m<fin.size();m++)
+        {
+            if(b[m]==2)
+            {
+                Answer.add(ans(fin.get(m)));
+                for(n=0;n<max+1;n++)
+                {
+                    if(a[m][n]==0)
+                    {
+                       for(p=0;p<fin.size();p++)
+                       {
+                           a[p][n]=1;
+                       }
+                    }
+                   
+                }
+            }
+        }
+        for(m=0;m<fin.size();m++)
+        {
+            for(n=0;n<max+1;n++)
+            {
+                System.out.print(a[m][n]+"\t");
+            }
+            System.out.println();
+        }
+   
+        ArrayList<String> two=new ArrayList<String>();                                  //handling double answers
+         for(m=0;m<fin.size();m++)
+        {
+            if(b[m]==0)
+            {
+                for(n=m+1;n<fin.size();n++)
+                {   
+                    if(b[n]==0)
+                    {
+                        int count1=0,count2=0,count3=0;
+                        for(p=0;p<max+1;p++)
+                        {
+                            if(a[n][p]==0)
+                            {
+                                count2++;
+                            }
+                            if(a[m][p]==0)
+                            {
+                                count1++;
+                            }
+                            if(a[m][p]==0&&a[n][p]==0)
+                            {
+                                count3++;
+                            }
+                            
+                        }    
+                        if(count3==count1&&count3>0&&count2!=count1)
+                            {
+                            /*for(q=0;q<max+1;q++)
+                                {
+                                    a[m][q]=1;
+                                }
+                                c[m]=1;
+                                c[n]=2;*/
+                               Answer.add(ans(fin.get(n)));
+                            }
+                            if(count3==count2&&count3>0&&count2!=count1)
+                            {
+                                /*for(q=0;q<max+1;q++)
+                                {
+                                    a[n][q]=1;
+                                }
+                                b[n]=1;
+                                b[m]=2;
+                                        */
+                                Answer.add(ans(fin.get(m)));
+                            }
+                            if(count3==count2&&count3>0&&count2==count1)
+                            {
+                                two.add(ans(fin.get(m)));                                            
+                                two.add(ans(fin.get(n)));
+                            }
+                    }
+                }
+            }
+        }
+        for(j=0;j<fin.size();j++)
+        {
+         System.out.println(b[j]);
+        }
+        if(two.size()>0)
+        {
+            for(m=0;m<two.size();m++)
+            {
+                for(n=0;n<Answer.size();n++)
+                {
+                    System.out.print(Answer.get(n)+" + ");                                                        
+                }
+                System.out.println(two.get(m));
+            }
+        }
+        else
+        {
+            for(n=0;n<Answer.size();n++)
+                {
+                    System.out.print(Answer.get(n)+" + ");                                                        
+                }
+        }
+    }
+    
+    public static int count(String p)
+    {
+        int j,count=0;
+        for(j=0;j<p.length();j++)                                                                   //counting number of ones in string 
+            {
+                if(p.charAt(j)=='1')
+                {
+                    count++;
+                }
+            } 
+        return count;
+    }
+    public static String ans(String s)                                                      // finding answer term in form of alphabets
+    {
+        int j;
+        String k="";
+        for(j=65;j<65+s.length();j++)
+        {
+            if(s.charAt(j-65)=='1')
+            {
+                k=k+Character.toString((char)j);
+            }
+            else
+                if(s.charAt(j-65)=='0')
+            {
+                k=k+Character.toString((char)j)+"'";
+            }
+        }
+        return k;
+    }
+}
+class b
+{
+    ArrayList<String> binary=new ArrayList<>();
+    ArrayList<String> integer=new ArrayList<>();
+    ArrayList<Boolean> compar=new ArrayList<Boolean>();
+}
